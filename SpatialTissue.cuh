@@ -23,7 +23,6 @@ public:
 	cudaStream_t MyoStream, GridStream;
 	cudaStream_t memcpyStream_myo, memcpyStream_grid;
 	int I_stim_location;
-	int I_light_myo_location;
 	myocyte<NMYOS, NCable>* rabbit_myocyte;
 	myocyte<NMYOS, NCable>* d_rabbit_myocyte;
 	Cell_Grid<NMYOS, NCable>* cable_grid;
@@ -45,7 +44,7 @@ public:
 	double ryo_f_Ina_junc[NMYOS * NCable];
 	double ryo_f_k1_junc[NMYOS * NCable];
 	int size_of_para_matrix; 
-	SpatialTissue(int current_stim_location, int myo_light_location);
+	SpatialTissue(int current_stim_location);
 	~SpatialTissue();
 	void arrange_cells_surface_and_Capacitance(double &rate_af_am, double &rate_aj_af);
 	void arrange_cleft_parameter(double *g_cleft_control, double *width_of_cleft_myo, double *G_gap_myo);
@@ -54,11 +53,11 @@ public:
 	void calculate_invert_armadillo();
 	void calculate_invert_cublas();
 	void invert(double** src, double** dst, int n, int batchSize);
-	bool step(double dt, double &Istim, double &Ilight, double &Ilight_myo, double MAXDVDT, bool output_time_check,double in_time);
+	bool step(double dt, double &Istim, double MAXDVDT, bool output_time_check,double in_time);
 	void calculate_matrix();
 };
 template <unsigned int NMYOS, unsigned int NCable>
-__global__ void Compute_Myocyte_ODE(double dt, myocyte<NMYOS, NCable>* rabbit_myocyte,Cell_Grid<NMYOS, NCable>* cable_grid, double Ilight_myo, double Istim, int I_light_myo_location, int I_stim_location, double in_time);
+__global__ void Compute_Myocyte_ODE(double dt, myocyte<NMYOS, NCable>* rabbit_myocyte,Cell_Grid<NMYOS, NCable>* cable_grid, double Istim, int I_stim_location, double in_time);
 template <unsigned int NMYOS, unsigned int NCable>
 __global__ void Compute_Cleft_ODE(Cell_Grid<NMYOS, NCable>* cable_grid);
 template <unsigned int NMYOS, unsigned int NCable>

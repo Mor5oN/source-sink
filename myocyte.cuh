@@ -38,21 +38,10 @@ public:
 	double ryo_f_k1_lat[NMYOS * NCable];
 	double ryo_f_Ina_junc[NMYOS * NCable];
 	double ryo_f_k1_junc[NMYOS * NCable];
-	double O1_ChR2_myo[NMYOS * NCable];
-	double O2_ChR2_myo[NMYOS * NCable];
-	double C1_ChR2_myo[NMYOS * NCable];
-	double C2_ChR2_myo[NMYOS * NCable];
-	double p_ChR2_myo[NMYOS * NCable];
 	double ydot[181][NMYOS * NCable];
-	double d_O1_ChR2_myo[NMYOS * NCable];
-	double d_O2_ChR2_myo[NMYOS * NCable];
-	double d_C1_ChR2_myo[NMYOS * NCable];
-	double d_C2_ChR2_myo[NMYOS * NCable];
-	double d_p_ChR2_myo[NMYOS * NCable];
 	double i_Na_lateral[NMYOS * NCable];
 	double i_K1_lateral[NMYOS * NCable];
 	double i_comp_lateral[NMYOS * NCable];
-	double i_ChR2_myo[NMYOS * NCable];
 	double I_tot_lateral[NMYOS * NCable];
 	double I_Na_lateral_foroutput[NMYOS * NCable];
 	double I_K1_lateral_foroutput[NMYOS * NCable];
@@ -71,8 +60,8 @@ public:
 	double I_Na_tot_myo_cl[2][NMYOS * NCable];
 	double I_K1_tot_myo_cl[2][NMYOS * NCable];
 	__host__ myocyte();
-	__host__ __device__ void eccODEfile(int id, double dt, double &Ilight_myo0,double in_time);
-	__host__ __device__ void DAD_eccODEfile(int id, double dt, double &Ilight_myo0,double in_time);
+	__host__ __device__ void eccODEfile(int id, double dt, double in_time);
+	__host__ __device__ void DAD_eccODEfile(int id, double dt, double in_time);
 	__host__ __device__ void rabbit_juncODEfile(int id, int j, double dt);
 	__host__ __device__ void rabbit_covert_to_Current(int id, double Istim);
 	__host__ __device__ void rabbit_update(int id, double dt);
@@ -96,7 +85,6 @@ public:
 	__host__ __device__ double i_SERCA_lat(int id);
 	__host__ __device__ void Myofilament(int id, int &mechFlag);
 	__host__ __device__ void Na_Ca_buffer(int id, double &Mgi, double &Vmyo, double &Vjunc, double &Vsl, double &J_CaB_cytosol, double &J_CaB_junction, double &J_CaB_sl);
-	__host__ __device__ double i_ChR2(int id,double &Ilight);
 };
 #include "myocyte.cu"
 #endif

@@ -31,10 +31,9 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =
     }                                                                                                           \
     while(0)
 template <unsigned int NMYOS, unsigned int NCable>
-SpatialTissue<NMYOS, NCable>::SpatialTissue(int current_stim_location, int myo_light_location)
+SpatialTissue<NMYOS, NCable>::SpatialTissue(int current_stim_location)
 {
 	I_stim_location = current_stim_location;
-	I_light_myo_location = myo_light_location;
 	size_of_para_matrix = NMYOS + NMYOS - 1; 
 	radius = 15.0;	
 	length = 100.0; 
@@ -87,9 +86,9 @@ SpatialTissue<NMYOS, NCable>::~SpatialTissue()
 	cudaFree(d_cable_grid);
 }
 template <unsigned int NMYOS, unsigned int NCable>
-bool SpatialTissue<NMYOS, NCable>::step(double dt, double &Istim, double &Ilight, double &Ilight_myo, double MAXDVDT, bool output_time_check,double in_time)
+bool SpatialTissue<NMYOS, NCable>::step(double dt, double &Istim, double MAXDVDT, bool output_time_check,double in_time)
 {
-	Compute_Myocyte_ODE<<<dimGrid_myo, dimBlock_myo, 0, MyoStream>>>(dt, d_rabbit_myocyte, d_cable_grid, Ilight_myo, Istim, I_light_myo_location, I_stim_location,in_time);
+	Compute_Myocyte_ODE<<<dimGrid_myo, dimBlock_myo, 0, MyoStream>>>(dt, d_rabbit_myocyte, d_cable_grid, Istim, I_stim_location,in_time);
 	gpuErrchk(cudaDeviceSynchronize());
 	Compute_Cleft_ODE<<<dimGrid_cleft, dimBlock_cleft, 0, GridStream>>>(d_cable_grid);
 	Arrange_Linear_Constant<<<dimGrid_matrix, dimBlock_matrix, 0, GridStream>>>(d_cable_grid);
@@ -108,12 +107,9 @@ bool SpatialTissue<NMYOS, NCable>::step(double dt, double &Istim, double &Ilight
 template <unsigned int NMYOS, unsigned int NCable> __global__
 __global__ void Compute_Myocyte_ODE(double dt, myocyte<NMYOS, NCable>* rabbit_myocyte, 
 									Cell_Grid<NMYOS, NCable>* cable_grid, 
-									double Ilight_myo, 
 									double Istim, 
-									int I_light_myo_location, 
 									int I_stim_location,
 									double in_time){
-	double Ilight_myo0;
 	double Istim0;
 	int location, left_cleft_location, right_cleft_location;
 	const unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -121,10 +117,9 @@ __global__ void Compute_Myocyte_ODE(double dt, myocyte<NMYOS, NCable>* rabbit_my
 	const unsigned int id  = idy * NMYOS + idx;
 	if (idx >= NMYOS || idy >= NCable)
 		return;
-	Ilight_myo0 = (idx == I_light_myo_location) ? Ilight_myo : 0.0;
 	int st_start = 99 - (I_stim_location) / 2;
 	int st_end   = 99 + (I_stim_location + 1) / 2;
-		rabbit_myocyte -> eccODEfile(id, dt, Ilight_myo0,in_time);
+		rabbit_myocyte -> eccODEfile(id, dt, in_time);
 	for (int j = 0; j < 2; j++)
 	{
 		if (rabbit_myocyte -> myo_cable_location[id] == 0)

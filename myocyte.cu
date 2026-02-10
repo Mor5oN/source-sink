@@ -187,11 +187,6 @@ __host__ myocyte<NMYOS, NCable>::myocyte()
 		y[178][i] = 1.8361112e-3;
 		y[179][i] = 4.0592685e-3;
 		y[180][i] = 1.0940869e-2;
-		O1_ChR2_myo[i] = 0.0;
-		O2_ChR2_myo[i] = 0.0;
-		C1_ChR2_myo[i] = 1.0;
-		C2_ChR2_myo[i] = 0.0;
-		p_ChR2_myo[i] = 0.0;
 		for (int j = 0; j < 2; j++)
 		{
 			m_myo_junc[j][i] = 0.00193464775226056; 
@@ -210,7 +205,7 @@ __host__ myocyte<NMYOS, NCable>::myocyte()
 	}
 }
 template <unsigned int NMYOS, unsigned int NCable>
-__host__ __device__ void myocyte<NMYOS, NCable>::eccODEfile(int id, double dt, double &Ilight_myo0,double in_time)
+__host__ __device__ void myocyte<NMYOS, NCable>::eccODEfile(int id, double dt, double in_time)
 {
 	double IKs_PKAp = y[87 + 6 + 45 + 6 + 34][id] / IKstotBA;
 	double ICFTR_PKAp = y[87 + 6 + 45 + 6 + 35][id] / ICFTRtotBA;
@@ -361,7 +356,7 @@ __host__ __device__ void myocyte<NMYOS, NCable>::eccODEfile(int id, double dt, d
 						 i_Cl_lateral ;
 }
 template <unsigned int NMYOS, unsigned int NCable>
-__host__ __device__ void myocyte<NMYOS, NCable>::DAD_eccODEfile(int id, double dt, double &Ilight_myo0,double in_time)
+__host__ __device__ void myocyte<NMYOS, NCable>::DAD_eccODEfile(int id, double dt, double in_time)
 {
 	double IKs_PKAp = y[87 + 6 + 45 + 6 + 34][id] / IKstotBA;
 	double ICFTR_PKAp = y[87 + 6 + 45 + 6 + 35][id] / ICFTRtotBA;
@@ -594,11 +589,6 @@ __host__ __device__ void myocyte<NMYOS, NCable>::rabbit_update(int id, double dt
 	{
 		y[i][id] += ydot[i][id] * dt;
 	}
-	O1_ChR2_myo[id] += d_O1_ChR2_myo[id] * dt;
-	O2_ChR2_myo[id] += d_O2_ChR2_myo[id] * dt;
-	C1_ChR2_myo[id] += d_C1_ChR2_myo[id] * dt;
-	C2_ChR2_myo[id] += d_C2_ChR2_myo[id] * dt;
-	p_ChR2_myo[id] += d_p_ChR2_myo[id] * dt;
 	for (int j = 0; j < 2; j++)
 	{
 		m_myo_junc[j][id] += d_m_myo_junc[j][id] * dt;
@@ -1353,36 +1343,4 @@ __host__ __device__ void myocyte<NMYOS, NCable>::Na_Ca_buffer(int id, double &Mg
 	ydot[29][id] = kon_slh * y[37][id] * (Bmax_SLhighsl - y[29][id]) - koff_slh * y[29][id]; 
 	J_CaB_junction = ydot[26][id] + ydot[28][id];
 	J_CaB_sl = ydot[27][id] + ydot[29][id];
-}
-template <unsigned int NMYOS, unsigned int NCable>
-__host__ __device__ double myocyte<NMYOS, NCable>::i_ChR2(int id, double &Ilight)
-{
-	double E_ChR2 = 0.0;
-	double g_ChR2 = 0.75; 
-	double gama0 = 0.1;
-	double Gd2 = 0.05;
-	double epsilon1 = 0.8535;
-	double epsilon2 = 0.14;
-	double tau_ChR2 = 1.3;
-	double e12d = 0.011;
-	double e21d = 0.008;
-	double lambda = 470;
-	double w_loss = 0.77;
-	double G = (10.6408 - 14.6408 * exp(-y[39][id] / 42.7671)) / y[39][id];
-	double Gd1 = (0.075 + 0.043 * tanh((y[39][id] + 20) / -20));
-	double Gr = 4.34587 * 1.0e-5 * exp(-0.0211539274 * y[39][id]);
-	double e12 = e12d + 0.005 * log(1 + Ilight / 0.024);
-	double e21 = e21d + 0.004 * log(1 + Ilight / 0.024);
-	double sita = 100 * Ilight;
-	double S0_sita = 0.5 * (1 + tanh(120 * (sita - 0.1)));
-	double F = 0.0006 * Ilight * lambda / w_loss;
-	double k1_ChR2 = epsilon1 * F * p_ChR2_myo[id];
-	double k2_ChR2 = epsilon2 * F * p_ChR2_myo[id];
-	d_O1_ChR2_myo[id] = (-(Gd1 + e12) * O1_ChR2_myo[id] + e21 * O2_ChR2_myo[id] + k1_ChR2 * C1_ChR2_myo[id]);
-	d_O2_ChR2_myo[id] = (e12 * O1_ChR2_myo[id] - (Gd2 + e21) * O2_ChR2_myo[id] + k2_ChR2 * C2_ChR2_myo[id]);
-	d_C1_ChR2_myo[id] = (Gd1 * O1_ChR2_myo[id] - k1_ChR2 * C1_ChR2_myo[id] + Gr * C2_ChR2_myo[id]);
-	d_C2_ChR2_myo[id] = (Gd2 * O2_ChR2_myo[id] - (k2_ChR2 + Gr) * C2_ChR2_myo[id]);
-	d_p_ChR2_myo[id] = (S0_sita - p_ChR2_myo[id]) / tau_ChR2;
-	double I_ChR2_myo = g_ChR2 * G * (O1_ChR2_myo[id] + gama0 * O2_ChR2_myo[id]) * (y[39][id] - E_ChR2); 
-	return I_ChR2_myo;
 }

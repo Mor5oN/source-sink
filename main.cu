@@ -15,15 +15,9 @@ using namespace std;
 #define INPUTFROMFILE
 const unsigned int NBeat = 2;
 const double StimStrength = 50;
-const double lightStrength = 0;
-const double lightStrength_myo = 0;
 const double StimDur = 1;
-const double lightDur = 10;
-const double lightDur_myo = 10;
 double dt = 0.001;
 const unsigned int StimSteps = static_cast<int>(StimDur / dt);
-const unsigned int lightSteps = static_cast<int>(lightDur / dt);
-const unsigned int lightSteps_myo = static_cast<int>(lightDur_myo / dt);
 const double MAXDVDT = 25;
 const unsigned int TS_ADAPT_MULT = 100; 
 const unsigned int NUMofMYOS = number_of_myocyte;       
@@ -58,9 +52,8 @@ int main(int argc, char *argv[])
 	}
 	cout << endl;
 	int current_stim_location = std::stoi(stim_location) - 1;
-	int myo_light_location = 0;
 	class SpatialTissue<NUMofMYOS, NUMofCable> *wholeTissue = 
-		new SpatialTissue<NUMofMYOS, NUMofCable>(current_stim_location,myo_light_location);
+		new SpatialTissue<NUMofMYOS, NUMofCable>(current_stim_location);
 	double pcl = atof(spcl.c_str());
 	double rate_af_am = atof(srate_af_am.c_str());
 	double rate_aj_af = atof(srate_aj_af.c_str());
@@ -229,15 +222,13 @@ int main(int argc, char *argv[])
 			}
 			if(i == 0) output_time_check = true;
 			double Istim = (i < StimSteps && numbeat < NBeat) ? StimStrength : 0.0;
-			double Ilight = (i < lightSteps && numbeat < NBeat) ? lightStrength : 0.0;
-			double Ilight_myo = (i < lightSteps_myo && numbeat < NBeat) ? lightStrength_myo : 0.0;
 			double in_time = i*dt; 
-			bool success = wholeTissue -> step(dt, Istim, Ilight, Ilight_myo, MAXDVDT, output_time_check,in_time);
+			bool success = wholeTissue -> step(dt, Istim, MAXDVDT, output_time_check,in_time);
 			if (!success)
 			{
 				for (int n = 0; n < TS_ADAPT_MULT; n++)
 				{
-					wholeTissue -> step(dt / TS_ADAPT_MULT, Istim, Ilight, Ilight_myo, MAXDVDT, output_time_check,in_time);
+					wholeTissue -> step(dt / TS_ADAPT_MULT, Istim, MAXDVDT, output_time_check,in_time);
 				}
 			}
 		}
