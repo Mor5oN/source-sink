@@ -61,7 +61,6 @@ public:
 	double I_K1_tot_myo_cl[2][NMYOS * NCable];
 	__host__ myocyte();
 	__host__ __device__ void eccODEfile(int id, double dt, double in_time);
-	__host__ __device__ void DAD_eccODEfile(int id, double dt, double in_time);
 	__host__ __device__ void rabbit_juncODEfile(int id, int j, double dt);
 	__host__ __device__ void rabbit_covert_to_Current(int id, double Istim);
 	__host__ __device__ void rabbit_update(int id, double dt);
