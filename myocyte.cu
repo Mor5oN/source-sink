@@ -223,7 +223,7 @@ __host__ __device__ void myocyte<NMYOS, NCable>::eccODEfile(int id, double dt, d
 	double Fjunc_CaL = 0.9;
 	double Fsl_CaL = 1.0 - Fjunc_CaL;
 	double cellLength = 100.0;		  
-	double cellRadius = 11;		  
+	double cellRadius = 15;		  
 	double junctionLength = 15.0e-3;  
 	double junctionRadius = 160.0e-3; 
 	double distSLcyto = 0.45;		  
