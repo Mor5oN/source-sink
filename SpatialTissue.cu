@@ -35,7 +35,7 @@ SpatialTissue<NMYOS, NCable>::SpatialTissue(int current_stim_location)
 {
 	I_stim_location = current_stim_location;
 	size_of_para_matrix = NMYOS + NMYOS - 1; 
-	radius = 15.0;	
+	radius = 11.0;	
 	length = 100.0; 
 	dimBlock_myo.x = BLOCK_SIZE_X;
 	dimBlock_grid.x = BLOCK_SIZE_X;
